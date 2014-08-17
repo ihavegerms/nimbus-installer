@@ -1,13 +1,12 @@
 #!/usr/bin/python
 
+import subprocess
 import socket
-import string
-import sys
 import os
+import re
 
 def main():
     reqchk()
-    ipcollect()
 
 def ipcollect():
 
@@ -17,11 +16,11 @@ def ipcollect():
     valid = []
     invalid = []
 
-    cont = raw_input("internal ip address of your Controller node: ")
     x = raw_input("internal ip's to install Nimbus on [space seperated]: ")
 
     # uses spaces to split input and performs basic checks to confirm accuracy
     splitx = x.split()
+
     for splitip in splitx:
         try:
             socket.inet_aton(splitip)
@@ -29,52 +28,30 @@ def ipcollect():
             invalid.append(splitip)
         else:
             valid.append(splitip)
-
-    print (valid, invalid)
+    return (valid)
 
 def reqchk():
-    # this function first confirms the required data files are in place for nimbus install
-    # basic checks are performed to confirm accuracy... there may be a better way to do it,
-    # so modify later if needed... [germs - aug-14-14]
-    test1 = os.path.isfile("/root/.rackspace/server_number")
-    test2 = os.path.isfile("/root/.rackspace/datacenter")
-    test3 = os.path.isfile("/root/.rackspace/customer_number")
 
-    if test1 and test2 and test3 is True:
-        pass
-    elif test1 is False:
-        print "[error] /root/.rackspace/server_number is missing"
-        srvnum = raw_input("please enter the server_number: ")
-        if len(srvnum) < 10 and srvnum.isdigit():
-            srvnumfi = open('/root/.rackspace/server_number', 'w')
-            srvnumfi.write(srvnum)
-            srvnumfi.close()
-            reqchk()
-        else:
-            print "The server number entered is invalid."
-            reqchk()
-    elif test2 is False:
-        print "[error] /root/.rackspace/datacenter is missing"
-        datacen = raw_input("please enter the datacenter: ")
-        if len(datacen) < 4 and datacen.isidgit() == False:
-            datacenfi = open('/root/.rackspace/datacenter', 'w')
-            datacentfi.write(datacen)
-            datacentfi.close()
-            reqchk()
-        else:
-            print "The datacenter entered is invalid."
-            reqchk()
-    elif test3 is False:
-        print "[error] /root/.rackspace/customer_number is missing"
-        custnum = raw_input("please enter the account number: ")
-        if len(custnum) < 10 and custnum.isdigit():
-            custnumfi = open('/root/.rackspace/customer_number', 'w')
-            custnumfi.write(custnum)
-            custnumfi.close()
-            reqchk()
-        else:
-            print "The customer number entered is invalid."
-            reqchk()
+    # instantiate list from ipcollect function and write to a dsh group
+    ips = ipcollect()
+    reqchk_group = open('/etc/dsh/group/reqchk', 'w')
+    for ip in ips:
+        reqchk_group.write(ip)
+        reqchk_group.write("\n")
+    reqchk_group.close()
+
+    # confirm required files exist on each host
+    doiexist = ["/root/.rackspace/server_number", "/root/.rackspace/datacenter", "/root/.rackspace/customer_number"]
+
+    for ip in ips:
+        loopcnt = 0
+        for path in doiexist:
+            gather = subprocess.call(["ssh", ip, "cat " + path])
+            verify = re.sub(r'^0', '\n', str(gather))
+            loopcnt += 1
+
+            if loopcnt == 3:
+                print "---"
 
 if __name__ == "__main__":
     main()
