@@ -27,7 +27,7 @@ def ipcollect():
             invalid.append(splitip)
         else:
             valid.append(splitip)
-    return (valid)
+    return valid
 
 
 def reqchk():
