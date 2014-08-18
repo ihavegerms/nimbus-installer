@@ -18,12 +18,9 @@ def main():
 
 def ipcollect():
   # this function collects the internal ip's to install nimbus on.
-  # *add later* use the ip addresses to confirm hostnames via /etc/hosts
     global x
     valid = []
     invalid = []
-
-  # uses spaces to split input and performs basic checks to confirm accuracy
     splitx = x.split()
 
     for splitip in splitx:
@@ -71,7 +68,8 @@ def reqchk():
 
 
 def install():
-
+  # download nimbus-installer.tar.gz and
+  # rax-nimbus-installer.sh to /tmp
     ips = ipcollect()
     print '[+] downloading/extracting/' \
           'installing nimbus-installer.tar.gz'
