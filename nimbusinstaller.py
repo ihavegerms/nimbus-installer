@@ -4,6 +4,7 @@ import re
 
 x = raw_input("internal ip's to install Nimbus on [space seperated]: ")
 
+
 def main():
 
     reqchk()
@@ -62,15 +63,21 @@ def reqchk():
         print "[-] exiting per request..."
         exit
 
+
 def install():
 
     ips = ipcollect()
-    print "[+] downloading/extracting/installing nimbus-installer.tar.gz"
+    print '[+] downloading/extracting/' \
+          'installing nimbus-installer.tar.gz'
     for ip in ips:
-        subprocess.call(["wget", "--quiet", "http://nimbus.howopenstack.org/nimbus-installer.tar.gz",
+        subprocess.call(["wget", "--quiet",
+                         "http://nimbus.howopenstack.org"
+                         "/nimbus-installer.tar.gz",
                          "-O", "/tmp/nimbus-installer.tar.gz"])
         subprocess.call(["wget", "--quiet", "--no-check-certificate",
-                         "https://raw.githubusercontent.com/rcbops/support-tools/master/support-scripts/rax-nimbus-installer.sh",
+                         "https://raw.githubusercontent.com/rcbops/"
+                         "support-tools/master/support-scripts"
+                         "/rax-nimbus-installer.sh",
                          "-qO", "/tmp/rax-nimbus-installer.sh"])
         subprocess.call(["bash", "/tmp/rax-nimbus-installer.sh"])
     print '[+] installation complete. verify openstack probes' \
