@@ -1,7 +1,13 @@
 import subprocess
 import socket
+import urllib
+import shutil
 import re
+import os
 
+print ''
+print 'This installer should be ran on the primary controller.'
+print '-------------------------------------------------------'
 x = raw_input("internal ip's to install Nimbus on [space seperated]: ")
 
 
@@ -52,15 +58,15 @@ def reqchk():
             loopcnt += 1
 
             if loopcnt == 3:
-                print "---"
+                print '---'
 
     proceed = raw_input("Is the above information correct (y/n): ")
-    print ""
+    print ''
     if proceed.lower() == "y":
-        print "[+] proceeding with installation..."
+        print '[+] proceeding with installation...'
         install()
     elif proceed.lower() == "n":
-        print "[-] exiting per request..."
+        print '[-] exiting per request...'
         exit
 
 
@@ -69,21 +75,23 @@ def install():
     ips = ipcollect()
     print '[+] downloading/extracting/' \
           'installing nimbus-installer.tar.gz'
+    print ''
     for ip in ips:
-        subprocess.call(["wget", "--quiet",
-                         "http://nimbus.howopenstack.org"
-                         "/nimbus-installer.tar.gz",
-                         "-O", "/tmp/nimbus-installer.tar.gz"])
-        subprocess.call(["wget", "--quiet", "--no-check-certificate",
-                         "https://raw.githubusercontent.com/rcbops/"
-                         "support-tools/master/support-scripts"
-                         "/rax-nimbus-installer.sh",
-                         "-qO", "/tmp/rax-nimbus-installer.sh"])
+        urllib.urlretrieve('http://nimbus.howopenstack.org/nimbus-installer.tar.gz',
+                           '/tmp/nimbus-installer.tar.gz')
+        urllib.urlretrieve('https://raw.githubusercontent.com/rcbops/support-tools/master/support-scripts/rax-nimbus-installer.sh',
+                           '/tmp/rax-nimbus-installer.sh')
+        subprocess.call(["chmod", "+x", "/tmp/rax-nimbus-installer.sh"])
         subprocess.call(["bash", "/tmp/rax-nimbus-installer.sh"])
+    print ''
+    print '[+] cleaning up my mess..'
+    shutil.rmtree("/tmp/nimbus-installer/")
+    os.remove("/tmp/nimbus-installer.tar.gz")
+    os.remove("/tmp/rax-nimbus-installer.sh")
     print '[+] installation complete. verify openstack probes' \
           ' in /opt/nimsoft/probes/'
-    print "[+] this process could take up to 15 minutes"
-    print ""
+    print '[+] this process could take up to 15 minutes'
+    print ''
 
 if __name__ == "__main__":
     main()
